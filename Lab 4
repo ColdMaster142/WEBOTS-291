@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+// Function prototypes
+int isValidDecimal(const char *str);
+void processData(const char *sourceFile, const char *destinationFile);
+
+int main() {
+    const char *sourceFile = "data.txt";
+    const char *destinationFile = "valid_data.txt";
+
+    processData(sourceFile, destinationFile);
+
+    return 0;
+}
+
+// Function to check if a string represents a valid decimal number
+int isValidDecimal(const char *str) {
+    char *endPtr;
+    strtod(str, &endPtr); // Attempt to parse the string as a decimal number
+    return (*str != '\0' && *endPtr == '\0'); // Ensure the entire string is parsed correctly
+}
+
+// Function to process the input and output files
+void processData(const char *sourceFile, const char *destinationFile) {
+    FILE *inputFile = fopen(sourceFile, "r");
+    FILE *outputFile = fopen(destinationFile, "w");
+    char lineBuffer[100];
+    int invalidEntries = 0;
+
+    // Check if the files were opened successfully
+    if (inputFile == NULL || outputFile == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read the file and process the data
+    while (fscanf(inputFile, "%s", lineBuffer) != EOF) {
+        if (isValidDecimal(lineBuffer)) {
+            fprintf(outputFile, "%s\n", lineBuffer); // Write valid decimals to the output file
+        } else {
+            invalidEntries++; // Increment the counter for invalid entries
+        }
+    }
+
+    // Ensure no read errors occurred during file processing
+    if (ferror(inputFile)) {
+        perror("Error reading from input file");
+        fclose(inputFile);
+        fclose(outputFile);
+        exit(EXIT_FAILURE);
+    }
+
+    // Close the files
+    fclose(inputFile);
+    fclose(outputFile);
+
+    // Print the number of invalid decimal values found
+    printf("Number of invalid decimal values: %d\n", invalidEntries);
+}
